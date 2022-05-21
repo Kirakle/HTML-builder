@@ -9,7 +9,7 @@ fs.readdir(path.join(__dirname, 'secret-folder'), (err, files) => {
         fs.stat(path.join(__dirname, 'secret-folder', files[i]), (err, stat) => {
             if (err) console.log(err.message);
             if (stat.isFile()) {
-                fileinfo += path.parse(files[i]).name + ' - ' + path.parse(files[i]).ext.slice(1) + ' - ' + `${stat.size / 1000}kb` + '\n';
+                fileinfo += path.parse(files[i]).name + ' - ' + path.parse(files[i]).ext.slice(1) + ' - ' + `${(stat.size / 1024).toFixed(2)}kb` + '\n';
             }
             if (i === files.length - 1) console.log(fileinfo);
         });
