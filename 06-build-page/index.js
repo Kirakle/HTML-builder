@@ -45,24 +45,28 @@ fs.readdir(path.join(__dirname, 'styles'), (err, files) => {
 
 // Assets 
 
-fs.mkdir(path.join(__dirname, 'project-dist', 'assets'), { recursive: true }, err => {
-    if (err) throw err;
-});
+fs.mkdir(path.join(__dirname, 'project-dist', 'assets'), () => { });
 
-fs.readdir(path.join(__dirname, 'assets'), (err, folders) => {
-    if (err) throw err;
-    folders.forEach(folder => {
-        fs.mkdir(path.join(__dirname, 'project-dist', 'assets', folder), { recursive: true }, err => {
-            if (err) throw err;
-        });
-        fs.readdir(path.join(__dirname, 'assets', folder), (err, files) => {
-            if (err) throw err;
-            files.forEach(file => {
-                fs.copyFile(path.join(__dirname, 'assets', folder, file), path.join(__dirname, 'project-dist', 'assets', folder, file), (err) => { if (err) throw err });
-            })
+const copyFilesFromFolder = (folder, targetFolder) => {
+    fs.readdir(path.join(__dirname, folder), { withFileTypes: true }, (err, files) => {
+        if (err) console.log(err);
+        files.forEach(file => {
+
+            if (file.isFile()) {
+                fs.copyFile(path.join(__dirname, folder, file.name), path.join(__dirname, targetFolder, file.name), err => {
+                    if (err) console.log(err);
+                });
+            } else {
+                fs.mkdir(path.join(__dirname, targetFolder, file.name), () => { });
+                copyFilesFromFolder(`${folder}/${file.name}`, `${targetFolder}/${file.name}`);
+            }
+
         });
     });
-});
+};
+copyFilesFromFolder('assets', 'project-dist/assets');
+
+
 
 // html
 
@@ -91,3 +95,42 @@ fs.readFile(path.join(__dirname, 'template.html'), (err, html) => {
         });
     });
 });
+
+
+// fs.mkdir(path.join(__dirname, 'project-dist', 'assets'), { recursive: true }, err => {
+//     if (err) throw err;
+// });
+
+// const copyFilesFromFolder = (folder) => {
+//     fs.readdir(folder, (err, files) => {
+//         if (err) throw err;
+//         files.forEach((file) => {
+//             console.log(file);
+//             fs.stat(path.join(folder, file), (err, stat) => {
+//                 if (err) throw err;
+//                 if (stat.isFile()) {
+//                     let rigthAdress = folder.slice(0, 51) + 'project-dist\\' + folder.slice(58, folder.length);
+//                     // console.log('**********');
+//                     // console.log(path.join(folder, file));
+//                     // console.log(path.join(rigthAdress, file));
+//                     // console.log('**********');
+
+//                     fs.copyFile(
+//                         path.join(folder, file),
+//                         path.join(rigthAdress, file),
+//                         () => {}
+//                     );
+//                 };
+//                 if (stat.isDirectory()) {
+//                     let rigthAdress = folder.slice(0, 51) + 'project-dist\\' + folder.slice(58, folder.length);
+//                     fs.mkdir(path.join(rigthAdress, path.parse(folder).name, file), { recursive: true }, err => {
+//                         if (err) throw err;
+//                     });
+//                     copyFilesFromFolder(path.join(folder, file));
+//                 };
+//             });
+//         });
+//     });
+// };
+
+// copyFilesFromFolder(path.join(__dirname, 'assets'), 'assets');
