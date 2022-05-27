@@ -4,9 +4,37 @@ const path = require('path');
 const StringDecoder = require('string_decoder').StringDecoder;
 const decoder = new StringDecoder('utf8');
 
-fs.mkdir(path.join(__dirname, 'project-dist'), { recursive: true }, err => {
-    if (err) throw err;
+// Assets 
+
+fs.rm(path.join(__dirname, 'project-dist'), { recursive: true }, () => {
+
+    fs.mkdir(path.join(__dirname, 'project-dist'), { recursive: true }, err => {
+        if (err) throw err;
+    });
+
+    fs.mkdir(path.join(__dirname, 'project-dist', 'assets'), () => { });
+
+    const copyFilesFromFolder = (folder, targetFolder) => {
+        fs.readdir(path.join(__dirname, folder), { withFileTypes: true }, (err, files) => {
+            if (err) console.log(err);
+            files.forEach(file => {
+
+                if (file.isFile()) {
+                    fs.copyFile(path.join(__dirname, folder, file.name), path.join(__dirname, targetFolder, file.name), err => {
+                        if (err) console.log(err);
+                    });
+                } else {
+                    fs.mkdir(path.join(__dirname, targetFolder, file.name), () => { });
+                    copyFilesFromFolder(`${folder}/${file.name}`, `${targetFolder}/${file.name}`);
+                }
+
+            });
+        });
+    };
+    copyFilesFromFolder('assets', 'project-dist/assets');
 });
+
+
 
 // Styles
 
@@ -42,31 +70,6 @@ fs.readdir(path.join(__dirname, 'styles'), (err, files) => {
         });
     };
 });
-
-// Assets 
-
-fs.mkdir(path.join(__dirname, 'project-dist', 'assets'), () => { });
-
-const copyFilesFromFolder = (folder, targetFolder) => {
-    fs.readdir(path.join(__dirname, folder), { withFileTypes: true }, (err, files) => {
-        if (err) console.log(err);
-        files.forEach(file => {
-
-            if (file.isFile()) {
-                fs.copyFile(path.join(__dirname, folder, file.name), path.join(__dirname, targetFolder, file.name), err => {
-                    if (err) console.log(err);
-                });
-            } else {
-                fs.mkdir(path.join(__dirname, targetFolder, file.name), () => { });
-                copyFilesFromFolder(`${folder}/${file.name}`, `${targetFolder}/${file.name}`);
-            }
-
-        });
-    });
-};
-copyFilesFromFolder('assets', 'project-dist/assets');
-
-
 
 // html
 
